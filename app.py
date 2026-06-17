@@ -5,7 +5,7 @@ import streamlit as st
 from PIL import Image
 import requests
 from io import BytesIO
-from services.generator import generate_image
+from generator import generate_image
 from services.editor import edit_image
 from services.prompt_engine import enhance_prompt
 
