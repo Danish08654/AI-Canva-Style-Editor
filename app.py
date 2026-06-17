@@ -7,7 +7,7 @@ import requests
 from io import BytesIO
 from generator import generate_image
 from editor import edit_image
-from services.prompt_engine import enhance_prompt
+from prompt_engine import enhance_prompt
 
 #  PAGE CONFIG 
 st.set_page_config(
