@@ -25,39 +25,6 @@ st.markdown(
 )
 st.markdown("---")
 
-# API KEY VALIDATION
-if "openai_api_key" not in st.session_state:
-    st.session_state.openai_api_key = os.getenv("OPENAI_API_KEY", "")
-
-# Sidebar for API key input
-with st.sidebar:
-    st.subheader(" Configuration")
-    api_key_input = st.text_input(
-        "Enter your OpenAI API Key",
-        value=st.session_state.openai_api_key,
-        type="password",
-        help="Get your API key from https://platform.openai.com/api-keys"
-    )
-    
-    if api_key_input:
-        st.session_state.openai_api_key = api_key_input
-        os.environ["OPENAI_API_KEY"] = api_key_input
-        st.success(" API Key set successfully!")
-    
-    st.info(
-        " **How to get an API key:**\n\n"
-        "1. Go to https://platform.openai.com\n"
-        "2. Sign in or create account\n"
-        "3. Navigate to API keys\n"
-        "4. Create new secret key\n"
-        "5. Copy and paste here"
-    )
-
-# Check if API key is set
-if not st.session_state.openai_api_key:
-    st.error(" **API Key Missing!** Please enter your OpenAI API key in the sidebar to continue.")
-    st.stop()
-
 # MODE SELECTION
 mode = st.radio(
     "Choose Mode",
