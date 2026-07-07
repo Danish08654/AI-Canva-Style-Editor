@@ -1,52 +1,55 @@
-import requests
+import torch
+from diffusers import StableDiffusionPipeline, DPMSolverMultistepScheduler
 from PIL import Image
-from io import BytesIO
+
+_pipeline = None
 
 
-# Free HF Inference API — Stable Diffusion XL
-HF_API_URL = "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0"
+def _load_pipeline():
+    global _pipeline
+    if _pipeline is not None:
+        return _pipeline
+
+    model_id = "runwayml/stable-diffusion-v1-5"
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    dtype = torch.float16 if torch.cuda.is_available() else torch.float32
+
+    pipe = StableDiffusionPipeline.from_pretrained(
+        model_id,
+        torch_dtype=dtype,
+        safety_checker=None,
+        requires_safety_checker=False,
+    )
+    pipe.scheduler = DPMSolverMultistepScheduler.from_config(pipe.scheduler.config)
+    pipe = pipe.to(device)
+
+    if device == "cpu":
+        pipe.enable_attention_slicing()
+
+    _pipeline = pipe
+    return _pipeline
 
 
-def generate_image(prompt: str, model: str = "sdxl", size: str = "1024x1024", api_key: str = "") -> Image.Image:
+def generate_image(prompt: str, model: str = "sd15", size: str = "512x512", api_key: str = "") -> Image.Image:
     """
-    Generate an image using Hugging Face Inference API (SDXL).
-    Returns a PIL Image object.
+    Generate an image locally using Stable Diffusion v1.5.
+    First call downloads the model (~4GB). Subsequent calls are fast.
     """
-    headers = {}
-    if api_key:
-        headers["Authorization"] = f"Bearer {api_key}"
-
-    # Parse size into width/height parameters
     try:
         width, height = map(int, size.split("x"))
     except ValueError:
-        width, height = 1024, 1024
+        width, height = 512, 512
 
-    payload = {
-        "inputs": prompt,
-        "parameters": {
-            "width": width,
-            "height": height,
-            "num_inference_steps": 30,
-            "guidance_scale": 7.5,
-        }
-    }
+    width = min(width, 768)
+    height = min(height, 768)
 
-    response = requests.post(HF_API_URL, headers=headers, json=payload, timeout=120)
+    pipe = _load_pipeline()
 
-    if response.status_code == 503:
-        raise RuntimeError(
-            "Model is loading on Hugging Face servers. Please wait 20–30 seconds and try again."
-        )
-    if response.status_code == 401:
-        raise RuntimeError(
-            "Invalid or missing Hugging Face API token. "
-            "Get a free token at https://huggingface.co/settings/tokens"
-        )
-    if response.status_code != 200:
-        raise RuntimeError(
-            f"Hugging Face API error {response.status_code}: {response.text[:300]}"
-        )
-
-    image = Image.open(BytesIO(response.content)).convert("RGB")
-    return image
+    result = pipe(
+        prompt=prompt,
+        width=width,
+        height=height,
+        num_inference_steps=25,
+        guidance_scale=7.5,
+    )
+    return result.images[0]
