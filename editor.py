@@ -4,7 +4,7 @@ from io import BytesIO
 import tempfile
 
 # Replace this with YOUR Space name
-SPACE_NAME = "https://huggingface.co/spaces/Rd786/DanishZulfiqar"
+SPACE_NAME ="https://huggingface.co/spaces/Rd786/DanishZulfiqar"
 
 client = Client(SPACE_NAME)
 
