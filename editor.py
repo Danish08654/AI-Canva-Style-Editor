@@ -4,7 +4,7 @@ from io import BytesIO
 import tempfile
 
 # Replace this with YOUR Space name
-SPACE_NAME = "DanishZulfiqar/your-image-editor"
+SPACE_NAME = "DanishZulfiqar"
 
 client = Client(SPACE_NAME)
 
