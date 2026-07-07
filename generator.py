@@ -2,26 +2,27 @@ from huggingface_hub import InferenceClient
 from PIL import Image
 
 
-def generate_image(prompt: str, model: str = "sdxl", size: str = "1024x1024", api_key: str = "") -> Image.Image:
+def generate_image(
+    prompt: str,
+    model: str = "black-forest-labs/FLUX.1-schnell",
+    size: str = "1024x1024",
+    api_key: str = "",
+) -> Image.Image:
     """
-    Generate an image using HF Serverless Inference API via InferenceClient.
-    Requires a free HF token from https://huggingface.co/settings/tokens
+    Generate an image using Hugging Face Inference Providers.
     """
+
     if not api_key:
         raise RuntimeError(
             "Hugging Face token is required.\n"
-            "Get a FREE token at: https://huggingface.co/settings/tokens\n"
-            "Then paste it in the sidebar."
+            "Get one from https://huggingface.co/settings/tokens"
         )
 
-    client = InferenceClient(
-        provider="hf-inference",
-        api_key=api_key,
-    )
+    client = InferenceClient(api_key=api_key)
 
     image = client.text_to_image(
         prompt=prompt,
-        model="stabilityai/stable-diffusion-xl-base-1.0",
+        model=model,
     )
 
-    return image  # already a PIL.Image
+    return image
