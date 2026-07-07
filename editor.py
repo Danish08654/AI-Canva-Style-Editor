@@ -1,24 +1,14 @@
-from gradio_client import Client, handle_file
+from huggingface_hub import InferenceClient
 from PIL import Image
 from io import BytesIO
-import tempfile, os
+import base64
 
-# Free public HF Space for instruction-based editing
-SPACE = "timbrooks/instruct-pix2pix"
 
-_client = None
+def _pil_to_bytes(image: Image.Image) -> bytes:
+    buf = BytesIO()
+    image.save(buf, format="PNG")
+    return buf.getvalue()
 
-def _get_client():
-    global _client
-    if _client is None:
-        _client = Client(SPACE)
-    return _client
-
-def _save_temp(image: Image.Image) -> str:
-    """Save PIL image to a temp file and return the path."""
-    tmp = tempfile.NamedTemporaryFile(suffix=".png", delete=False)
-    image.save(tmp.name, format="PNG")
-    return tmp.name
 
 def _resize(image: Image.Image, max_side: int = 512) -> Image.Image:
     w, h = image.size
@@ -27,35 +17,31 @@ def _resize(image: Image.Image, max_side: int = 512) -> Image.Image:
     scale = max_side / max(w, h)
     return image.resize((int(w * scale) & ~1, int(h * scale) & ~1), Image.LANCZOS)
 
+
 def edit_image(image: Image.Image, prompt: str, api_key: str = "") -> Image.Image:
     """
-    Edit image via free Hugging Face Space (timbrooks/instruct-pix2pix).
-    No token needed. No local download. Runs on HF servers.
+    Edit an image using HF Serverless Inference API (image-to-image task).
+    Uses stabilityai/stable-diffusion-xl-refiner-1.0 for img2img.
+    Requires a free HF token from https://huggingface.co/settings/tokens
     """
-    image = _resize(image.convert("RGB"))
-    tmp_path = _save_temp(image)
-
-    try:
-        client = _get_client()
-        result = client.predict(
-            image=handle_file(tmp_path),
-            instruction=prompt,
-            steps=20,
-            randomize_seed=True,
-            seed=0,
-            text_cfg_scale=7.5,
-            image_cfg_scale=1.5,
-            api_name="/generate"
+    if not api_key:
+        raise RuntimeError(
+            "Hugging Face token is required.\n"
+            "Get a FREE token at: https://huggingface.co/settings/tokens\n"
+            "Then paste it in the sidebar."
         )
 
-        if isinstance(result, (list, tuple)):
-            path = result[0] if result else None
-        else:
-            path = result
+    image = _resize(image.convert("RGB"))
 
-        if path and os.path.exists(path):
-            return Image.open(path).convert("RGB")
+    client = InferenceClient(
+        provider="hf-inference",
+        api_key=api_key,
+    )
 
-        raise RuntimeError(f"Unexpected response from Space: {result}")
-    finally:
-        os.unlink(tmp_path)
+    result = client.image_to_image(
+        image=image,
+        prompt=prompt,
+        model="timbrooks/instruct-pix2pix",
+    )
+
+    return result  # PIL.Image
