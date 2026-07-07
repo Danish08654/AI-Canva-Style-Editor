@@ -7,5 +7,4 @@ rembg
 onnxruntime
 requests
 huggingface-hub
-Client 
-handle_file
+gradio_client
