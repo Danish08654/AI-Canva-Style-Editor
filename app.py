@@ -71,7 +71,6 @@ else:
         uploaded = st.file_uploader("Upload an image to edit", type=["png", "jpg", "jpeg"])
         prompt = st.text_area("Edit Instructions",
             placeholder="e.g. change the background to a beach at sunset", height=150)
-        st.caption(" Be specific: 'make the sky purple and add stars' works better than 'change colors'.")
         edit_btn = st.button(" Apply AI Edit", type="primary", use_container_width=True)
 
     with col2:
