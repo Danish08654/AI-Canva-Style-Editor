@@ -11,7 +11,7 @@ from prompt_engine import enhance_prompt
 
 st.set_page_config(page_title="AI Image Generator & Editor", page_icon="🎨", layout="wide")
 
-st.markdown("<h1 style='text-align:center;'>🎨 AI Image Generator & Editor</h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='text-align:center;'>AI Image Generator & Editor</h1>", unsafe_allow_html=True)
 
 st.markdown("---")
 
@@ -28,43 +28,6 @@ def load_token() -> str:
 
 HF_TOKEN = load_token()
 
-# ── SIDEBAR ────────────────────────────────────────────────────────────────────
-with st.sidebar:
-    st.header("⚙️ Info")
-
-    if HF_TOKEN:
-        st.success("✅ HF Token loaded from secrets")
-    else:
-        st.error("❌ HF Token not found in secrets")
-        st.markdown("""
-**To add your token as a secret:**
-
-**Local:** Create `.streamlit/secrets.toml`:
-```toml
-HF_TOKEN = "hf_your_token_here"
-```
-
-**Streamlit Cloud:** Go to your app →
-⚙️ Settings → **Secrets** → add:
-```
-HF_TOKEN = "hf_your_token_here"
-```
-
-Get a free token at:
-[huggingface.co/settings/tokens](https://huggingface.co/settings/tokens)
-        """)
-
-    st.markdown("---")
-    st.markdown("**Models**")
-    st.markdown("🖼 Generate: `stable-diffusion-xl-base-1.0`")
-    st.markdown("✏️ Edit: `instruct-pix2pix`")
-    st.markdown("---")
-    st.info("⏳ First request may take ~20–30s (cold start)\n\n💡 Free tier: ~100–150 requests/day")
-
-# ── GATE ───────────────────────────────────────────────────────────────────────
-if not HF_TOKEN:
-    st.error("🔑 HF Token not configured. See sidebar instructions to add it as a secret.")
-    st.stop()
 
 # ── MODE ───────────────────────────────────────────────────────────────────────
 mode = st.radio("Choose Mode", ["🖼 Generate Image", "✏️ Edit Image"], horizontal=True)
