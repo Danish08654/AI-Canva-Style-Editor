@@ -10,10 +10,9 @@ from prompt_engine import enhance_prompt
 
 st.set_page_config(page_title="AI Image Generator & Editor", page_icon="🎨", layout="wide")
 
-st.markdown("<h1 style='text-align:center;'>🎨 AI Image Generator & Editor</h1>", unsafe_allow_html=True)
-st.markdown("---")
+st.markdown("<h1 style='text-align:center;'> AI Image Generator & Editor</h1>", unsafe_allow_html=True)
 
-# ── LOAD TOKEN ──────────────────────────────────────────────────────────────
+# LOAD TOKEN 
 def load_token() -> str:
     try:
         return st.secrets["HF_TOKEN"]
@@ -23,7 +22,7 @@ def load_token() -> str:
 
 HF_TOKEN = load_token()
 
-# ── SESSION STATE INIT ───────────────────────────────────────────────────────
+#  SESSION STATE INIT
 # Persists the last generated/uploaded image across reruns
 if "canvas_image" not in st.session_state:
     st.session_state.canvas_image = None          # PIL Image ready to edit
@@ -32,7 +31,7 @@ if "canvas_label" not in st.session_state:
 if "active_tab" not in st.session_state:
     st.session_state.active_tab = "🖼 Generate Image"
 
-# ── MODE SELECTOR ────────────────────────────────────────────────────────────
+# MODE SELECTOR 
 mode = st.radio(
     "Choose Mode",
     ["🖼 Generate Image", "✏️ Edit Image"],
@@ -42,9 +41,7 @@ mode = st.radio(
 )
 st.session_state.active_tab = mode
 
-# ════════════════════════════════════════════════════════════════════════════
 # GENERATE MODE
-# ════════════════════════════════════════════════════════════════════════════
 if mode == "🖼 Generate Image":
     col1, col2 = st.columns([1, 2])
 
@@ -106,18 +103,17 @@ if mode == "🖼 Generate Image":
                     st.session_state.active_tab = "✏️ Edit Image"
                     st.rerun()
 
-            st.success("✅ Image generated successfully!")
+            st.success(" Image generated successfully!")
 
-# ════════════════════════════════════════════════════════════════════════════
 # EDIT MODE
-# ════════════════════════════════════════════════════════════════════════════
+
 else:
     col1, col2 = st.columns([1, 2])
 
     with col1:
         st.subheader("📤 Image Source")
 
-        # ── Source selector ───────────────────────────────────────────────
+        #  Source selector
         source_options = ["⬆️ Upload an image"]
         if st.session_state.canvas_image is not None:
             source_options.insert(0, "🖼 Use last generated image")
@@ -176,7 +172,7 @@ else:
                             )
 
                         with right:
-                            st.image(result, caption="✅ Edited Result", use_container_width=True)
+                            st.image(result, caption=" Edited Result", use_container_width=True)
 
                         buf = BytesIO()
                         result.save(buf, format="PNG")
@@ -185,7 +181,7 @@ else:
                         dl_col, reuse_col = st.columns(2)
                         with dl_col:
                             st.download_button(
-                                "⬇️ Download Edited Image",
+                                " Download Edited Image",
                                 buf,
                                 "edited_image.png",
                                 "image/png",
@@ -193,7 +189,7 @@ else:
                             )
                         with reuse_col:
                             if st.button(
-                                "🔁 Edit This Result Again",
+                                " Edit This Result Again",
                                 use_container_width=True,
                                 type="secondary",
                             ):
@@ -202,9 +198,9 @@ else:
                                 st.session_state.canvas_label = "Edited Image"
                                 st.rerun()
 
-                        st.success("✅ Edit applied successfully!")
+                        st.success(" Edit applied successfully!")
 
                     except Exception as e:
                         st.error(f"❌ Error: {e}")
         else:
-            st.info("👈 Upload an image or generate one first, then come here to edit it.")
+            st.info(" Upload an image or generate one first, then come here to edit it.")
